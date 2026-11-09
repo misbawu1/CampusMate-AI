@@ -20,7 +20,9 @@ If Windows does not recognize `python` in an already-open terminal, open a new t
 3. Close and reopen VS Code so the server can read the new variable.
 4. Install the dependency and start `server.py` using the steps above.
 
-The AI question box uses the resources in `knowledge.json` as its reference and asks Gemini not to invent campus details. Answers stream onto the page as Gemini generates them; this reduces the wait before you see the first words, though it does not guarantee a shorter total response time. The regular keyword search works separately. Gemini API usage may be subject to account limits and billing.
+The AI question box gives Gemini a `search_campus_resources` tool. When a student asks about campus services or places, Gemini chooses a short topic and the Python server runs the existing `find_resource()` function from `tools.py` against `knowledge.json`. Only the matching resource details are sent back to Gemini for the final answer. Gemini can answer general questions without searching campus resources. Campus details should come only from search results; when no resource matches, CampusMate says it could not find the information.
+
+The AI response streams after CampusMate searches. Gemini first chooses whether to call the search tool, so that setup step may take a moment before answer text appears. The Interactions API requests use `store=False`; this keeps the multi-step tool flow stateless and avoids storing the question in the API's interaction history. The regular browser keyword search works separately. Gemini API usage may be subject to account limits and billing.
 
 The browser search and command-line version use the same `knowledge.json` campus information. The browser AI feature uses Google's `google-genai` Python package; the command-line search still uses only the Python standard library.
 
@@ -31,6 +33,7 @@ The browser search and command-line version use the same `knowledge.json` campus
 - `app.js` loads campus data, filters results, and sends AI questions to the Python server.
 - `server.py` serves the browser files and sends AI questions to Gemini.
 - `main.py` remains a simple command-line version for practicing Python.
-- `tools.py` contains reusable functions for loading and searching information.
+- `tools.py` contains reusable functions for loading and searching information; the AI search tool reuses `find_resource()`.
 - `knowledge.json` stores campus resources separately from the code.
 - `requirements.txt` records the Gemini SDK needed for the browser AI feature.
+

@@ -8,10 +8,42 @@ from pathlib import Path
 import threading
 import webbrowser
 
+from tools import find_resource, load_knowledge
+
 
 HOST = "127.0.0.1"
 PORT = 8000
 PROJECT_FOLDER = Path(__file__).resolve().parent
+MODEL = "gemini-3.8-flash"
+SEARCH_TOOL = {
+    "type": "function",
+    "name": "search_campus_resources",
+    "description": (
+        "Search CampusMate's official campus resource list for information that can answer "
+        "a campus-related question. Use a short topic or keyword, such as tutoring, career, "
+        "library, or health. Use this for every question about campus services or places."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "topic": {
+                "type": "string",
+                "description": "A short topic or keyword to search for in the campus resource list.",
+            }
+        },
+        "required": ["topic"],
+    },
+}
+SYSTEM_INSTRUCTION = (
+    "You are CampusMate, a friendly campus guide. For every question about campus services, "
+    "places, contacts, or hours, call search_campus_resources before answering. Use only "
+    "the information returned by that search for campus-specific facts. If no resource "
+    "matches, say CampusMate could not find that information and suggest a broader search. "
+    "Do not invent services, locations, hours, or contacts. For general questions outside "
+    "campus information, answer normally. For health questions, search for the Student "
+    "Health Center and do not diagnose or give treatment instructions. Keep answers to "
+    "three short sentences."
+)
 
 
 class CampusMateHandler(SimpleHTTPRequestHandler):
@@ -54,44 +86,81 @@ class CampusMateHandler(SimpleHTTPRequestHandler):
         try:
             from google import genai
 
-            with (PROJECT_FOLDER / "knowledge.json").open(encoding="utf-8") as file:
-                resources = json.load(file)
-
-            prompt = (
-                "You are CampusMate, a friendly guide to campus resources. "
-                "Answer using only the campus resource information below. "
-                "Keep answers to three short sentences. "
-                "Do not invent services, locations, hours, or contact details. "
-                "If the information does not answer the question, say what is missing "
-                "and suggest the closest listed resource. For health questions, do not "
-                "diagnose or give treatment instructions; point the student to the "
-                "Student Health Center.\n\n"
-                f"Campus resource information:\n{json.dumps(resources, ensure_ascii=False)}\n\n"
-                f"Student question: {question.strip()}"
-            )
             self._start_event_stream()
-            self._send_event({"type": "status", "message": "Gemini is preparing an answer…"})
+            self._send_event({"type": "status", "message": "CampusMate is searching campus resources…"})
 
             client = genai.Client()
+            history = [
+                {
+                    "type": "user_input",
+                    "content": [{"type": "text", "text": question.strip()}],
+                }
+            ]
+            interaction = client.interactions.create(
+                model=MODEL,
+                input=history,
+                system_instruction=SYSTEM_INSTRUCTION,
+                tools=[SEARCH_TOOL],
+                store=False,
+            )
+            history.extend(step.model_dump(exclude_none=True) for step in interaction.steps or [])
+
+            function_calls = [
+                step for step in interaction.steps or []
+                if getattr(step, "type", None) == "function_call"
+            ]
+
+            if not function_calls:
+                # General questions can be answered without consulting campus resources.
+                if interaction.output_text:
+                    self._send_event({"type": "text", "text": interaction.output_text})
+                    self._send_event({"type": "done"})
+                else:
+                    self._send_event({"type": "error", "message": "Gemini returned no answer. Please try again."})
+                return
+
+            resources = load_knowledge()
+            for call in function_calls:
+                if call.name != "search_campus_resources":
+                    continue
+                topic = call.arguments.get("topic", "") if isinstance(call.arguments, dict) else ""
+                matches = find_resource(resources, topic.strip()) if isinstance(topic, str) and topic.strip() else []
+                result = {
+                    "search_topic": topic,
+                    "resources": [
+                        {
+                            "name": item.get("name", ""),
+                            "description": item.get("description", ""),
+                            "contact": item.get("contact", ""),
+                        }
+                        for item in matches
+                    ],
+                    "message": "No matching campus resources were found." if not matches else "Matching campus resources are listed above.",
+                }
+                history.append({
+                    "type": "function_result",
+                    "name": call.name,
+                    "call_id": call.id,
+                    "result": [{"type": "text", "text": json.dumps(result, ensure_ascii=False)}],
+                })
+
+            self._send_event({"type": "status", "message": "Writing an answer from the search results…"})
             stream = client.interactions.create(
-                model="gemini-3.8-flash",
-                input=prompt,
+                model=MODEL,
+                input=history,
+                system_instruction=SYSTEM_INSTRUCTION,
+                tools=[SEARCH_TOOL],
                 store=False,
                 stream=True,
             )
             got_text = False
             for event in stream:
                 delta = getattr(event, "delta", None)
-                if (
-                    event.event_type == "step.delta"
-                    and delta
-                    and getattr(delta, "type", None) == "text"
-                    and getattr(delta, "text", None)
-                ):
+                if event.event_type == "step.delta" and delta and getattr(delta, "type", None) == "text" and getattr(delta, "text", None):
                     self._send_event({"type": "text", "text": delta.text})
                     got_text = True
                 elif event.event_type == "error":
-                    self._send_event({"type": "error", "message": "Gemini couldn't answer. Please try again."})
+                    self._send_event({"type": "error", "message": "Gemini couldn't finish the answer. Please try again."})
                     return
 
             if got_text:

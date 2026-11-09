@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#10243a">
+    <title>CampusMate — Your campus, made easier</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="CampusMate home">
+        <span class="brand-mark" aria-hidden="true">C</span>
+        <span>Campus<span class="brand-light">Mate</span></span>
+      </a>
+      <div class="header-note"><span class="status-dot"></span> Your campus, made easier</div>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-shape hero-shape-one" aria-hidden="true"></div>
+        <div class="hero-shape hero-shape-two" aria-hidden="true"></div>
+        <div class="hero-content">
+          <div class="eyebrow"><span class="sparkle" aria-hidden="true">✦</span> A little help goes a long way</div>
+          <h1 id="hero-title">Campus life,<br><span>figured out.</span></h1>
+          <p class="hero-copy">Find the people and places that can help you feel at home, get things done, and make the most of your day.</p>
+          <div class="hero-meta"><span class="avatar-stack" aria-hidden="true"><i>✦</i><i>✓</i><i>⌂</i></span><span>Helpful answers, all in one place</span></div>
+        </div>
+        <div class="hero-illustration" aria-hidden="true">
+          <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+          <div class="illustration-sun"></div>
+          <div class="campus-card">
+            <div class="campus-card-top"><span class="mini-brand">C</span><span class="mini-dots">•••</span></div>
+            <div class="campus-building"><div class="building-roof"></div><div class="building-main"><i></i><i></i><i></i><i></i></div><div class="building-base"></div></div>
+            <div class="campus-card-label"><strong>Your campus</strong><span>Good things are nearby.</span></div>
+          </div>
+          <div class="float-note note-study"><span class="note-icon purple">✎</span><span><b>Need a study spot?</b><small>We can help.</small></span></div>
+          <div class="float-note note-health"><span class="note-icon coral">♡</span><span><b>Here for your wellbeing</b><small>Support is close by.</small></span></div>
+          <div class="leaf leaf-one"></div><div class="leaf leaf-two"></div>
+        </div>
+      </section>
+
+      <section class="finder" aria-labelledby="finder-title">
+        <div class="finder-heading">
+          <div>
+            <div class="section-kicker">YOUR CAMPUS COMPANION</div>
+            <h2 id="finder-title">What can we help with?</h2>
+            <p>Search for a service, a place, or whatever is on your mind.</p>
+          </div>
+          <div class="resource-count"><span class="count-icon">✦</span><span id="resource-count">Loading resources…</span></div>
+        </div>
+
+        <form id="search-form" class="search-form" role="search">
+          <span class="search-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 4.5 4.5"></path></svg></span>
+          <label class="visually-hidden" for="search-input">Search campus resources</label>
+          <input id="search-input" type="search" placeholder="Try “tutoring”, “quiet study”, or “health”…" autocomplete="off">
+          <button class="search-button" type="submit">Find help <span aria-hidden="true">→</span></button>
+        </form>
+
+        <div class="popular-row"><span class="popular-label">POPULAR:</span>
+          <button class="topic-chip" type="button" data-topic="study">Study spaces</button>
+          <button class="topic-chip" type="button" data-topic="tutoring">Tutoring</button>
+          <button class="topic-chip" type="button" data-topic="health">Health &amp; wellness</button>
+        </div>
+
+        <section class="ask-panel" aria-labelledby="ask-title">
+          <div class="ask-heading">
+            <div class="section-kicker">CAMPUSMATE AI</div>
+            <h3 id="ask-title">Ask a question in your own words</h3>
+            <p>Get guidance based on the campus resources listed below.</p>
+          </div>
+          <form id="ask-form" class="ask-form">
+            <label class="visually-hidden" for="ask-input">Ask CampusMate a question</label>
+            <textarea id="ask-input" rows="3" maxlength="1000" placeholder="For example: Where can I get help preparing for an interview?" required></textarea>
+            <button id="ask-button" class="search-button" type="submit">Ask CampusMate <span aria-hidden="true">→</span></button>
+          </form>
+          <p id="ask-status" class="ask-status" role="status" aria-live="polite"></p>
+          <div id="ask-answer" class="ask-answer" hidden></div>
+        </section>
+
+        <div class="results-heading"><h3 id="results-title">A good place to start</h3><span class="results-rule"></span></div>
+        <div id="results" class="results-grid" aria-live="polite" aria-busy="true"></div>
+        <p id="empty-state" class="empty-state" hidden>No matches just yet. Try a broader search, like <button type="button" data-topic="help">help</button> or <button type="button" data-topic="study">study</button>.</p>
+      </section>
+    </main>
+
+    <footer class="site-footer"><a class="brand footer-brand" href="#top"><span class="brand-mark" aria-hidden="true">C</span><span>Campus<span class="brand-light">Mate</span></span></a><span>Small steps make campus feel smaller.</span><span class="footer-sparkle" aria-hidden="true">✦</span></footer>
+    <noscript><p class="noscript">CampusMate needs JavaScript enabled to search its resource list.</p></noscript>
+  </body>
+</html>

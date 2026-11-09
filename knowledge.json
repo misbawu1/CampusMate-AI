@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Campus Library",
+    "description": "Quiet study spaces, books, computers, and research help.",
+    "contact": "library@example.edu",
+    "keywords": ["study", "books", "research", "quiet"]
+  },
+  {
+    "name": "Tutoring Center",
+    "description": "Peer tutoring and help understanding course material.",
+    "contact": "tutoring@example.edu",
+    "keywords": ["class", "homework", "math", "writing", "help"]
+  },
+  {
+    "name": "Student Health Center",
+    "description": "Appointments and general health support for students.",
+    "contact": "health@example.edu",
+    "keywords": ["health", "doctor", "wellness", "appointment"]
+  },
+  {
+    "name": "Writing Lab",
+    "description": "Writing feedback and help with essays, editing, and proofreading.",
+    "contact": "writing@example.edu",
+    "keywords": ["essay", "editing", "proofreading", "citation"]
+  },
+  {
+    "name": "Career Center",
+    "description": "Help with résumés, job searches, and interview preparation.",
+    "contact": "careers@example.edu",
+    "keywords": ["career", "jobs", "resume", "interview", "internship"]
+  },
+  {
+    "name": "Sports Center",
+    "description": "Help with sports, have fun, and play competitions.",
+    "contact": "sports@example.edu",
+    "keywords": ["football", "volleyball", "basketball", "hockey"]
+  }
+]
